@@ -44,6 +44,14 @@ resource "aws_apigatewayv2_route" "videos_get_route" {
   authorization_type = "JWT"
 }
 
+resource "aws_apigatewayv2_route" "videos_post_route" {
+  api_id             = aws_apigatewayv2_api.api.id
+  route_key          = "POST /videos"
+  target             = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "JWT"
+}
+
 resource "aws_lambda_permission" "apigw_lambda" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
