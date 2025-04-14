@@ -3,11 +3,11 @@ provider "aws" {
 }
 
 data "aws_cognito_user_pool" "fiapeats_user_pool" {
-  user_pool_id = "us-east-1_udRdYqNeL"  
+  user_pool_id = "us-east-1_jyUJxkjOS"  
 }
 
 data "aws_cognito_user_pool_client" "fiapeats_client" {
-  client_id = "2mj0dbqvpnlm5513i9v90sttp5"
+  client_id = "ikl3maadcnd3orm0nrfdhsjpj"
   user_pool_id = data.aws_cognito_user_pool.fiapeats_user_pool.id
 }
 
