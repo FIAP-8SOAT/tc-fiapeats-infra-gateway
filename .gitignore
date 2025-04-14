@@ -1,0 +1,15 @@
+# Diretório de plugins e arquivos temporários do Terraform
+.terraform/
+
+# Arquivo de bloqueio do Terraform (opcional, veja explicação acima)
+.terraform.lock.hcl
+
+# Arquivo de estado e backups
+terraform.tfstate
+terraform.tfstate.backup
+
+# Planos de execução do Terraform
+tfplan
+
+# Outros arquivos de log ou temporários
+*.log

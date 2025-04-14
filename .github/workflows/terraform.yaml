@@ -1,0 +1,62 @@
+name: Terraform Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.6
+
+      - name: Terraform Init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Determine Action Based on Variable
+        id: determine_action
+        run: |
+          destroy_infra=$(grep 'destroy_infra' terraform.tfvars | cut -d '=' -f2 | tr -d ' ')
+          if [ "$destroy_infra" = "true" ]; then
+            echo "Infrastructure will be destroyed."
+            echo "action=destroy" >> $GITHUB_ENV
+          else
+            echo "Infrastructure will be applied."
+            echo "action=apply" >> $GITHUB_ENV
+          fi
+
+      - name: Plan Terraform
+        run: |
+          if [ "$action" == "destroy" ]; then
+            terraform plan -destroy -var-file="terraform.tfvars" -out=tfplan
+          else
+            terraform plan -var-file="terraform.tfvars" -out=tfplan
+          fi
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Apply Terraform
+        run: |
+          if [ "$action" == "destroy" ]; then
+            terraform destroy -auto-approve -var-file="terraform.tfvars"
+          else
+            terraform apply -auto-approve tfplan
+          fi
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
